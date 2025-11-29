@@ -21,6 +21,12 @@ type PhysicCalculator interface {
 	GetType() int
 }
 
+type Phys struct {
+	Mass
+	ForceGravity
+	Impulse
+}
+
 // Mass расчет массы тела по формуле m = qV
 // Определенный тип - 0
 type Mass struct {

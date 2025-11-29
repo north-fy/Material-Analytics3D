@@ -14,6 +14,12 @@ type MathCalculator interface {
 	GetType() int
 }
 
+type Math struct {
+	Cube
+	Parallelepiped
+	Pyramid
+}
+
 // Cube объект со значением длины одной стороны A
 // Определенный тип - 0
 type Cube struct {

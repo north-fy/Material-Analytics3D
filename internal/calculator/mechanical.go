@@ -16,6 +16,12 @@ type MechanicCalculator interface {
 	GetType() int
 }
 
+type Mech struct {
+	CompressiveStress
+	RelativeDeformation
+	YoungsModulus
+}
+
 // CompressiveStress Напряжение сжатия/растяжения со значением силы F и площади попер. сеч. S, перпендикулярная к силе F
 // Определенный тип - 0
 type CompressiveStress struct {

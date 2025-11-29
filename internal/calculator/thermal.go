@@ -13,6 +13,11 @@ type ThermicCalculator interface {
 	GetType() int
 }
 
+type Therm struct {
+	AmountHeat
+	ThermalExpansion
+}
+
 // AmountHeat Количество теплоты со значениями удельной теплоемкости c, массы m и изминения температуры delta T
 // Определенный тип - 0
 type AmountHeat struct {
