@@ -1,13 +1,10 @@
 package application
 
 import (
-	"log"
-
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/theme"
-	"github.com/north-fy/Material-Analytics3D/internal/application/layout"
-	"github.com/north-fy/Material-Analytics3D/internal/application/layout/authentication"
+	"github.com/north-fy/Material-Analytics3D/internal/repository"
 )
 
 // что у нас по архитектуре?
@@ -16,27 +13,45 @@ import (
 //
 
 type MainApp struct {
-	// окна и сервисы для них, как реализовать?
-	// интерфейс?
-	fyneApp fyne.App
-	router  *Router
-	manager *Manager
+	FyneApp fyne.App
+	Router  *Router
 }
 
-func NewMainApp() *MainApp {
-	a := app.New()
-	return &MainApp{
-		fyneApp: a,
+func NewMainApp(cfgRepo repository.Config, cfgApp ConfigApp) (*MainApp, error) {
+	App := app.New()
+	App.Settings().SetTheme(theme.DarkTheme())
+
+	window := App.NewWindow(cfgApp.Name)
+	window.Resize(fyne.Size{Height: cfgApp.AppHeight, Width: cfgApp.AppWidth})
+	window.SetFixedSize(cfgApp.FixedSize)
+
+	router, err := newRouter(cfgRepo)
+	if err != nil {
+		return nil, err
 	}
 
+	window.SetContent(router.managerWindow.SpecificWindows["auth"].Objects[0].Container)
+
+	err = router.managerWindow.ViewObj("auth")
+	if err != nil {
+		return nil, err
+	}
+
+	window.Show()
+
+	return &MainApp{
+		FyneApp: App,
+		Router:  router,
+	}, nil
 }
 
-func App() {
-	log.Println("welcome!")
-	a := app.New()
-	a.Settings().SetTheme(theme.DarkTheme())
+func (mp *MainApp) Run() error {
+	err := mp.Router.route()
+	if err != nil {
+		return err
+	}
 
-	w := layout.NewMainWindow(a)
-	w.SetupUI(authentication.AuthObjects())
-	w.Window.ShowAndRun()
+	mp.FyneApp.Run()
+
+	return nil
 }

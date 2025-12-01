@@ -12,16 +12,16 @@ const (
 //}
 
 type Object struct {
-	Cont *fyne.Container
-	Data map[string]interface{}
+	*fyne.Container
 }
 
 type Window struct {
 	Name    string
-	Objects []Object
+	Objects []*Object
+	Data    map[string]interface{}
 	IsShow  bool
 }
 
 type SpecificWindow struct {
-	specificWindows map[string]*Window
+	SpecificWindows map[string]*Window
 }

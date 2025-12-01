@@ -2,38 +2,36 @@ package layout
 
 import (
 	"errors"
-
-	"fyne.io/fyne/v2"
+	"log"
 )
 
-func NewSpecificWindow(App fyne.App, windows ...Window) *SpecificWindow {
-	window := App.NewWindow("Material-Analytics3D")
-	window.Resize(fyne.Size{Height: AppHeight, Width: AppWidth})
-	window.SetFixedSize(true)
-
+func NewSpecificWindow(windows ...*Window) *SpecificWindow {
 	ws := make(map[string]*Window, len(windows))
 	for _, v := range windows {
-		ws[v.Name] = &v
+		ws[v.Name] = v
 	}
 
 	result := &SpecificWindow{
-		specificWindows: ws,
+		SpecificWindows: ws,
 	}
 
 	return result
 }
 
 func (sw *SpecificWindow) ViewObj(name string) error {
-	if _, ok := sw.specificWindows[name]; !ok {
+	window, ok := sw.SpecificWindows[name]
+	if !ok {
 		return errors.New("name is not available in map")
 	}
 
-	for _, v := range sw.specificWindows[name].Objects {
-		if v.Cont.Visible() == false {
-			v.Cont.Show()
+	for _, v := range window.Objects {
+		if v.Visible() == true {
+			v.Show()
 		} else {
-			v.Cont.Hide()
+			v.Hide()
 		}
+
+		log.Println("ViewObj", v.Container.Visible())
 	}
 
 	return nil

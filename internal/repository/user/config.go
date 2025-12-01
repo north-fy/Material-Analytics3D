@@ -1,12 +1,14 @@
 package user
 
 type AccessType struct {
-	IsCreator bool
-	IsPremium bool
-	IsUser    bool
+	// 0 - unknown
+	// 1 - user
+	// 2 - vip
+	// 3 - executor
+	Access int
 }
 type User struct {
-	Email    string
+	Login    string
 	Password string
 	Access   AccessType
 }
