@@ -10,8 +10,18 @@ import (
 )
 
 type Config struct {
-	dbCfb  repository.Config     `yaml:"database"`
-	appCfg application.ConfigApp `yaml:"app"`
+	Database struct {
+		Host     string `yaml:"host"`
+		User     string `yaml:"user"`
+		Password string `yaml:"password"`
+		Sslmode  string `yaml:"sslmode"`
+	} `yaml:"database"`
+	App struct {
+		AppHeight float32 `yaml:"app-height"`
+		AppWidth  float32 `yaml:"app-width"`
+		Name      string  `yaml:"name"`
+		FixedSize bool    `yaml:"fixed-size"`
+	} `yaml:"app"`
 }
 
 func main() {
@@ -20,7 +30,10 @@ func main() {
 		log.Fatal(err)
 	}
 
-	app, err := application.NewMainApp(cfg.dbCfb, cfg.appCfg)
+	cfgDB := repository.NewConfig(cfg.Database.Host, cfg.Database.User, cfg.Database.Password, cfg.Database.Sslmode)
+	cfgApp := application.NewConfig(cfg.App.AppHeight, cfg.App.AppWidth, cfg.App.Name, cfg.App.FixedSize)
+
+	app, err := application.NewMainApp(*cfgDB, *cfgApp)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -33,7 +46,6 @@ func main() {
 
 func LoadConfig(path string) (*Config, error) {
 	data, err := os.ReadFile(path)
-	log.Println(data)
 	if err != nil {
 		return nil, err
 	}

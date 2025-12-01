@@ -20,3 +20,14 @@ type Router struct {
 }
 
 // managerService map[string]interface{}
+
+func NewConfig(appHeight float32, appWidth float32, name string, fixedsize bool) *ConfigApp {
+	config := &ConfigApp{
+		AppHeight: appHeight,
+		AppWidth:  appWidth,
+		Name:      name,
+		FixedSize: fixedsize,
+	}
+
+	return config
+}

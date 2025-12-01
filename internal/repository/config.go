@@ -18,20 +18,16 @@ type Database struct {
 	DB *sql.DB
 }
 
-//func NewConfig() (*Config, error) {
-//	data, err := ioutil.ReadFile("config.yaml")
-//	if err != nil {
-//		return nil, err
-//	}
-//
-//	var config Config
-//	err = yaml.Unmarshal(data, &config)
-//	if err != nil {
-//		return nil, err
-//	}
-//
-//	return &config, nil
-//}
+func NewConfig(host, user, password, sslmode string) *Config {
+	config := &Config{
+		Host:     host,
+		User:     user,
+		Password: password,
+		SSLmode:  sslmode,
+	}
+
+	return config
+}
 
 func InitDB(cfg Config) (*Database, error) {
 	dataSourceName := fmt.Sprintf("host=%s dbname=%s password=%s sslmode=%s",

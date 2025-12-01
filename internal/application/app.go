@@ -30,7 +30,9 @@ func NewMainApp(cfgRepo repository.Config, cfgApp ConfigApp) (*MainApp, error) {
 		return nil, err
 	}
 
-	window.SetContent(router.managerWindow.SpecificWindows["auth"].Objects[0].Container)
+	sw := router.managerWindow.SpecificWindows["auth"]
+
+	window.SetContent(sw.GetContainers())
 
 	err = router.managerWindow.ViewObj("auth")
 	if err != nil {

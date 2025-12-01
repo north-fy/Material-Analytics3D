@@ -62,5 +62,17 @@ func (w *Window) newLogo() {
 		icon,
 	)
 
+	cont = container.NewCenter(cont)
+
 	w.Objects = append(w.Objects, &Object{cont})
+}
+
+func (w *Window) GetContainers() *fyne.Container {
+	cont := container.NewVBox()
+
+	for _, object := range w.Objects {
+		cont.Add(object.Container)
+	}
+
+	return cont
 }
