@@ -32,9 +32,8 @@ func (w *Window) newAuthMenu() {
 	entryPassword.SetPlaceHolder("Пароль")
 
 	buttonAuth := widget.NewButton("Войти в аккаунт", func() {
-		login := entryLogin.Text
-		password := entryPassword.Text
-		//... auth()
+		w.Data["login"] = entryLogin.Text
+		w.Data["password"] = entryPassword.Text
 	})
 
 	buttonReg := widget.NewButton("Зарегистрироваться", func() {

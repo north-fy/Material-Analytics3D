@@ -1,13 +1,21 @@
 package application
 
 import (
+	"log"
+
+	"fyne.io/fyne/v2"
 	"github.com/north-fy/Material-Analytics3D/internal/calculator"
 	"github.com/north-fy/Material-Analytics3D/internal/repository"
 )
 
-func newRouter(cfg repository.Config) (*Router, error) {
-	manager := windowManager()
+type Router struct {
+	managerScreen *ScreenManager
+	calcService   *calculator.CalcService
+	repo          *repository.Database
+}
 
+func newRouter(cfg repository.Config, window fyne.Window) (*Router, error) {
+	manager := NewScreenManager(window)
 	calcService := calculator.CreateCalcService()
 	DB, err := repository.InitDB(cfg)
 	if err != nil {
@@ -15,29 +23,27 @@ func newRouter(cfg repository.Config) (*Router, error) {
 	}
 
 	return &Router{
-		managerWindow: manager,
+		managerScreen: manager,
 		calcService:   calcService,
 		repo:          DB,
 	}, nil
 }
 
-func (r *Router) route() error {
-	for key, window := range r.managerWindow.SpecificWindows {
-		switch key {
-		case "auth":
-			if window.Data["reg"] == true {
-				login := window.Data["login"]
-				password := window.Data["password"]
-
-				// потом заменить на хендлер функцию выскакивания неправильного логина/пароля
-				_, err := r.repo.GetUser(login.(string), password.(string))
-				if err != nil {
-					return err
-				}
-				// логика захода в base
-				// ...
-			}
-		}
+func (r *Router) handleAuth(login, password string) {
+	u, err := r.repo.GetUser(login, password)
+	if err != nil {
+		// ЗАМЕНИТЬ
+		log.Fatal(err)
+		return
 	}
-	return nil
+
+	if u.Login == "" || u.Password == "" {
+		// тут мб виджет
+		log.Println("agaaga")
+		return
+	}
+	_ = u
+
+	log.Println("handled!")
+	//switchTo(base, access)
 }

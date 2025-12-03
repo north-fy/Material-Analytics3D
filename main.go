@@ -38,10 +38,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	err = app.Run()
-	if err != nil {
-		log.Fatal(err)
-	}
+	app.Run()
 }
 
 func LoadConfig(path string) (*Config, error) {

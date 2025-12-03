@@ -25,35 +25,27 @@ func NewMainApp(cfgRepo repository.Config, cfgApp ConfigApp) (*MainApp, error) {
 	window.Resize(fyne.Size{Height: cfgApp.AppHeight, Width: cfgApp.AppWidth})
 	window.SetFixedSize(cfgApp.FixedSize)
 
-	router, err := newRouter(cfgRepo)
+	router, err := newRouter(cfgRepo, window)
 	if err != nil {
 		return nil, err
 	}
 
-	sw := router.managerWindow.SpecificWindows["auth"]
-
-	window.SetContent(sw.GetContainers())
-
-	err = router.managerWindow.ViewObj("auth")
-	if err != nil {
-		return nil, err
-	}
-
-	window.Show()
-
-	return &MainApp{
+	mainApp := &MainApp{
 		FyneApp: App,
 		Router:  router,
-	}, nil
-}
-
-func (mp *MainApp) Run() error {
-	err := mp.Router.route()
-	if err != nil {
-		return err
 	}
 
-	mp.FyneApp.Run()
+	mainApp.initScreens()
 
-	return nil
+	return mainApp, nil
+}
+
+func (mp *MainApp) initScreens() {
+	mp.Router.managerScreen.addScreen("auth", mp.Router.createMainScreen())
+
+	mp.Router.managerScreen.setCurrentScreen("auth")
+}
+
+func (mp *MainApp) Run() {
+	mp.Router.managerScreen.window.ShowAndRun()
 }
