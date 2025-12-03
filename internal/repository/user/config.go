@@ -1,5 +1,12 @@
 package user
 
+const (
+	AccessUnknown = iota
+	AccessUser
+	AccessVIP
+	AccessExecutor
+)
+
 type AccessType struct {
 	// 0 - unknown
 	// 1 - user

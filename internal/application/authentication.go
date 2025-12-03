@@ -23,6 +23,7 @@ func (r *Router) createMainScreen() fyne.CanvasObject {
 	})
 
 	buttonReg := widget.NewButton("Зарегистрироваться", func() {
+		r.managerScreen.setCurrentScreen("reg")
 	})
 
 	contAdaptiveMenu := container.NewGridWrap(fyne.NewSize(700/2, 40), // FIX size

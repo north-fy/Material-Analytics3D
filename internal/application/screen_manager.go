@@ -20,16 +20,11 @@ func NewScreenManager(window fyne.Window) *ScreenManager {
 
 func (sm *ScreenManager) addScreen(name screenName, obj fyne.CanvasObject) {
 	sm.screens[name] = obj
-	sm.window.SetContent(obj)
 }
 
 func (sm *ScreenManager) setCurrentScreen(name screenName) {
-	if sm.currentScreen != "" {
-		sm.screens[sm.currentScreen].Hide()
-	}
-
 	sm.currentScreen = name
-	sm.screens[name].Show()
+	sm.window.SetContent(sm.screens[name])
 }
 
 func (sm *ScreenManager) setOnSwitch() {

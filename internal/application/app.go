@@ -42,6 +42,7 @@ func NewMainApp(cfgRepo repository.Config, cfgApp ConfigApp) (*MainApp, error) {
 
 func (mp *MainApp) initScreens() {
 	mp.Router.managerScreen.addScreen("auth", mp.Router.createMainScreen())
+	mp.Router.managerScreen.addScreen("reg", mp.Router.createRegScreen())
 
 	mp.Router.managerScreen.setCurrentScreen("auth")
 }

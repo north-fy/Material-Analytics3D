@@ -16,15 +16,15 @@ func (d *Database) AddUser(u user.User) error {
 	return nil
 }
 
-func (d *Database) IsUser(u user.User) error {
+func (d *Database) IsUser(login string) bool {
 	db := d.DB
-	var login, password string
-	_ = db.QueryRow(`SELECT login, password FROM users WHERE login=$1, password=$2`, u.Login, u.Password).Scan(&login, &password)
-	if login == "" && password == "" {
-		return sql.ErrNoRows
+	var isLogin string
+	_ = db.QueryRow(`SELECT login FROM users WHERE login=$1`, login).Scan(&isLogin)
+	if isLogin == "" {
+		return false
 	}
 
-	return nil
+	return true
 }
 
 func (d *Database) GetUser(login, password string) (user.User, error) {

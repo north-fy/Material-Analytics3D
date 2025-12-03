@@ -6,6 +6,7 @@ import (
 	"fyne.io/fyne/v2"
 	"github.com/north-fy/Material-Analytics3D/internal/calculator"
 	"github.com/north-fy/Material-Analytics3D/internal/repository"
+	"github.com/north-fy/Material-Analytics3D/internal/repository/user"
 )
 
 type Router struct {
@@ -46,4 +47,16 @@ func (r *Router) handleAuth(login, password string) {
 
 	log.Println("handled!")
 	//switchTo(base, access)
+}
+
+func (r *Router) handleReg(login, password string) {
+	u, err := user.NewUser(user.AccessType{Access: user.AccessUser}, login, password)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = r.repo.AddUser(*u)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
