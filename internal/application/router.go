@@ -39,6 +39,5 @@ func (r *Router) route() error {
 			}
 		}
 	}
-
 	return nil
 }
