@@ -42,14 +42,5 @@ func InitDB(cfg Config) (*Database, error) {
 		return nil, err
 	}
 
-	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS users(
-    id SERIAL,
-    login TEXT,
-    password TEXT,
-    access INT)`)
-	if err != nil {
-		return nil, err
-	}
-
 	return &Database{DB: db}, nil
 }

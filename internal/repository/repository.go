@@ -8,7 +8,7 @@ import (
 
 func (d *Database) AddUser(u user.User) error {
 	db := d.DB
-	_, err := db.Exec(`INSERT OR IGNORE INTO users (login, password, access) VALUES ($1, $2, $3)`, u.Login, u.Password, u.Access)
+	_, err := db.Exec(`INSERT INTO users (login, password, access) VALUES ($1, $2, $3)`, u.Login, u.Password, u.Access.Access) // FIX
 	if err != nil {
 		return err
 	}
