@@ -18,9 +18,11 @@ func (d *Database) AddUser(u user.User) error {
 
 func (d *Database) IsUser(login string) bool {
 	db := d.DB
-	var isLogin string
-	_ = db.QueryRow(`SELECT login FROM users WHERE login=$1`, login).Scan(&isLogin)
-	if isLogin == "" {
+	u := user.User{}
+	id := 0
+	_ = db.QueryRow(`SELECT * FROM users WHERE login=$1`, login).Scan(&id, &u.Login, &u.Password, &u.Access.Access)
+
+	if u.Login == "" || login == "" {
 		return false
 	}
 
@@ -28,8 +30,8 @@ func (d *Database) IsUser(login string) bool {
 }
 
 func (d *Database) GetUser(login, password string) (user.User, error) {
-	unicUser := user.User{}
 	db := d.DB
+	unicUser := user.User{}
 	row := db.QueryRow(`SELECT login, access FROM users WHERE login=$1, password=$2`, login, password).Scan(&unicUser.Login, &unicUser.Access)
 	if row == nil {
 		return unicUser, sql.ErrNoRows

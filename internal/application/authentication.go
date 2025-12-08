@@ -5,6 +5,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
 )
 
@@ -19,7 +20,11 @@ func (r *Router) createMainScreen() fyne.CanvasObject {
 	entryPassword.SetPlaceHolder("Пароль")
 
 	buttonAuth := widget.NewButton("Войти в аккаунт", func() {
-		r.handleAuth(entryLogin.Text, entryPassword.Text)
+		err := r.handleAuth(entryLogin.Text, entryPassword.Text)
+		if err != nil {
+			dialog.ShowError(err, r.managerScreen.window)
+			return
+		}
 	})
 
 	buttonReg := widget.NewButton("Зарегистрироваться", func() {

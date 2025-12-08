@@ -21,6 +21,13 @@ func NewMainApp(cfgRepo repository.Config, cfgApp ConfigApp) (*MainApp, error) {
 	App := app.New()
 	App.Settings().SetTheme(theme.DarkTheme())
 
+	image, err := fyne.LoadResourceFromPath("./assets/logo.png")
+	if err != nil {
+		return nil, err
+	}
+
+	App.SetIcon(image)
+
 	window := App.NewWindow(cfgApp.Name)
 	window.Resize(fyne.Size{Height: cfgApp.AppHeight, Width: cfgApp.AppWidth})
 	window.SetFixedSize(cfgApp.FixedSize)

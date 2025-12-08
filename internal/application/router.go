@@ -30,33 +30,30 @@ func newRouter(cfg repository.Config, window fyne.Window) (*Router, error) {
 	}, nil
 }
 
-func (r *Router) handleAuth(login, password string) {
+func (r *Router) handleAuth(login, password string) error {
 	u, err := r.repo.GetUser(login, password)
 	if err != nil {
-		// ЗАМЕНИТЬ
-		log.Fatal(err)
-		return
+		return err
 	}
-
+	log.Println(u)
 	if u.Login == "" || u.Password == "" {
-		// тут мб виджет
-		log.Println("agaaga")
-		return
+		return errWrongData
 	}
 	_ = u
-
-	log.Println("handled!")
+	return nil
 	//switchTo(base, access)
 }
 
-func (r *Router) handleReg(login, password string) {
+func (r *Router) handleReg(login, password string) error {
 	u, err := user.NewUser(user.AccessType{Access: user.AccessUser}, login, password)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	err = r.repo.AddUser(*u)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
+
+	return nil
 }

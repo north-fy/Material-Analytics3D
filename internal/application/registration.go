@@ -5,6 +5,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
 )
 
@@ -23,13 +24,24 @@ func (r *Router) createRegScreen() fyne.CanvasObject {
 
 	buttonReg := widget.NewButton("Зарегистрироваться", func() {
 		if entryPassword.Text == entryPasswordTwo.Text {
-			if ok := r.repo.IsUser(entryLogin.Text); !ok {
-				// сюда виджет
-				log.Println("данный логин уже занят!")
+			if ok := r.repo.IsUser(entryLogin.Text); ok {
+				dialog.ShowError(errLoginIsExists, r.managerScreen.window)
+				return
 			}
 
-			r.handleReg(entryLogin.Text, entryPassword.Text)
+			err := r.handleReg(entryLogin.Text, entryPassword.Text)
+			if err != nil {
+				dialog.ShowError(err, r.managerScreen.window)
+				return
+			}
+		} else {
+			dialog.ShowError(errNotCorrectPasswords, r.managerScreen.window)
+			return
 		}
+	})
+
+	buttonBack := widget.NewButton("В главное меню", func() {
+		r.managerScreen.setCurrentScreen("auth")
 	})
 
 	contAdaptiveMenu := container.NewGridWrap(fyne.NewSize(700/2, 40), // FIX size
@@ -37,20 +49,30 @@ func (r *Router) createRegScreen() fyne.CanvasObject {
 		entryPassword,
 		entryPasswordTwo,
 		buttonReg,
+		buttonBack,
 	)
 
 	contAdaptiveMenu = container.NewCenter(contAdaptiveMenu)
 
 	// лого
 
-	labelReg := widget.NewLabel("Registration")
-	contLabelReg := container.NewGridWrap(fyne.NewSize(700/2, 180), // FIX size
-		labelReg,
+	image, err := fyne.LoadResourceFromPath("./assets/logo.png")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	icon := widget.NewIcon(image)
+	contLogo := container.NewGridWrap(fyne.NewSize(700/2, 180), // FIX size
+		icon,
 	)
 
-	contLabelReg = container.NewCenter(contLabelReg)
+	labelReg := widget.NewLabel("Registration")
+	labelReg.Resize(fyne.NewSize(200, 200))
+
+	contLabelReg := container.NewCenter(labelReg)
 
 	cont := container.NewCenter(container.NewVBox(
+		contLogo,
 		contLabelReg,
 		contAdaptiveMenu,
 	))
