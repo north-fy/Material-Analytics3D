@@ -29,11 +29,11 @@ func (d *Database) IsUser(login string) bool {
 	return true
 }
 
-func (d *Database) GetUser(login, password string) (user.User, error) {
+func (d *Database) GetUser(login string) (user.User, error) {
 	db := d.DB
 	unicUser := user.User{}
-	row := db.QueryRow(`SELECT login, access FROM users WHERE login=$1, password=$2`, login, password).Scan(&unicUser.Login, &unicUser.Access)
-	if row == nil {
+	row := db.QueryRow(`SELECT login, password, access FROM users WHERE login=$1`, login).Scan(&unicUser.Login, &unicUser.Password, &unicUser.Access.Access)
+	if row != nil {
 		return unicUser, sql.ErrNoRows
 	}
 

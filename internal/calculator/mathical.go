@@ -33,7 +33,7 @@ func NewCube(side float64) *Cube {
 func (c *Cube) Calculate() *MathProperties {
 	totalArea := 6 * math.Pow(c.Side, 2)
 	volume := math.Pow(c.Side, 3)
-
+	
 	return &MathProperties{TotalArea: totalArea, Volume: volume}
 }
 

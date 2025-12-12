@@ -1,8 +1,6 @@
 package application
 
 import (
-	"log"
-
 	"fyne.io/fyne/v2"
 	"github.com/north-fy/Material-Analytics3D/internal/calculator"
 	"github.com/north-fy/Material-Analytics3D/internal/repository"
@@ -31,15 +29,16 @@ func newRouter(cfg repository.Config, window fyne.Window) (*Router, error) {
 }
 
 func (r *Router) handleAuth(login, password string) error {
-	u, err := r.repo.GetUser(login, password)
+	u, err := r.repo.GetUser(login)
 	if err != nil {
-		return err
+		return errWrongData
 	}
-	log.Println(u)
+
 	if u.Login == "" || u.Password == "" {
 		return errWrongData
 	}
 	_ = u
+	r.managerScreen.setCurrentScreen("base")
 	return nil
 	//switchTo(base, access)
 }
