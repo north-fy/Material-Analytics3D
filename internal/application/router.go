@@ -28,6 +28,7 @@ func newRouter(cfg repository.Config, window fyne.Window) (*Router, error) {
 	}, nil
 }
 
+// handleAuth FIXXX
 func (r *Router) handleAuth(login, password string) error {
 	u, err := r.repo.GetUser(login)
 	if err != nil {

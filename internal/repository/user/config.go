@@ -1,10 +1,16 @@
 package user
 
+import "errors"
+
 const (
 	AccessUnknown = iota
 	AccessUser
 	AccessVIP
 	AccessExecutor
+)
+
+var (
+	errWrongData = errors.New("wrong login or password")
 )
 
 type AccessType struct {

@@ -22,9 +22,9 @@ type PhysicCalculator interface {
 }
 
 type Phys struct {
-	Mass
-	ForceGravity
-	Impulse
+	Mass         Mass
+	ForceGravity ForceGravity
+	Impulse      Impulse
 }
 
 // Mass расчет массы тела по формуле m = qV
@@ -86,23 +86,23 @@ func (i *Impulse) GetType() int {
 	return ImpulseType
 }
 
-func CreatePhysicCalculator(physicType int, values ...float64) (PhysicCalculator, error) {
+func CreatePhysicCalculator(physicType string, values map[string]float64) (PhysicCalculator, error) {
 	switch physicType {
-	case 0: // Mass m = qV
+	case "Mass": // Mass m = qV
 		if len(values) == 2 {
-			return NewMass(values[0], values[1]), nil
+			return NewMass(values["Density"], values["Volume"]), nil
 		}
 		return nil, ErrEnoughArg
 
-	case 1: // ForceGravity F = mg
+	case "ForceGravity": // ForceGravity F = mg
 		if len(values) == 1 {
-			return NewForceGravity(values[0]), nil
+			return NewForceGravity(values["Mass"]), nil
 		}
 		return nil, ErrEnoughArg
 
-	case 2: // Impulse I = mv
+	case "Impulse": // Impulse I = mv
 		if len(values) == 2 {
-			return NewImpulse(values[0], values[1]), nil
+			return NewImpulse(values["Mass"], values["Velocity"]), nil
 		}
 		return nil, ErrEnoughArg
 

@@ -1,7 +1,5 @@
 package user
 
-import "errors"
-
 func NewUser(access AccessType, login, password string) (*User, error) {
 	user := &User{
 		Login:    login,
@@ -14,11 +12,11 @@ func NewUser(access AccessType, login, password string) (*User, error) {
 
 func (u User) AuthUser(login, password string) error {
 	if u.Login != login {
-		return errors.New("login doesn't exist")
+		return errWrongData
 	}
 
 	if u.Password != password {
-		return errors.New("incorrect password")
+		return errWrongData
 	}
 
 	return nil

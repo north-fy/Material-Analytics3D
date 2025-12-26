@@ -15,9 +15,9 @@ type MathCalculator interface {
 }
 
 type Math struct {
-	Cube
-	Parallelepiped
-	Pyramid
+	Cube           Cube
+	Parallelepiped Parallelepiped
+	Pyramid        Pyramid
 }
 
 // Cube объект со значением длины одной стороны A
@@ -33,7 +33,7 @@ func NewCube(side float64) *Cube {
 func (c *Cube) Calculate() *MathProperties {
 	totalArea := 6 * math.Pow(c.Side, 2)
 	volume := math.Pow(c.Side, 3)
-	
+
 	return &MathProperties{TotalArea: totalArea, Volume: volume}
 }
 
@@ -88,23 +88,23 @@ func (p *Pyramid) GetType() int {
 
 // CreateMathCalculator создает фигуру по типу фигуры и значениям
 // Выдает значения в метрах, стоит учитывать
-func CreateMathCalculator(ShapeType int, values ...float64) (MathCalculator, error) {
+func CreateMathCalculator(ShapeType string, values map[string]float64) (MathCalculator, error) {
 	switch ShapeType {
-	case 0: // Cube
+	case "Cube": // Cube
 		if len(values) == 1 {
-			return NewCube(values[0]), nil
+			return NewCube(values["Side"]), nil
 		}
 		return nil, ErrEnoughArg
 
-	case 1: // Parallelepiped
+	case "Parallelepiped": // Parallelepiped
 		if len(values) == 3 {
-			return NewParallelepiped(values[0], values[1], values[2]), nil
+			return NewParallelepiped(values["Lenght"], values["Width"], values["Height"]), nil
 		}
 		return nil, ErrEnoughArg
 
-	case 2: // Pyramid
+	case "Pyramid": // Pyramid
 		if len(values) == 2 {
-			return NewPyramid(values[0], values[1]), nil
+			return NewPyramid(values["BaseSide"], values["Height"]), nil
 		}
 		return nil, ErrEnoughArg
 

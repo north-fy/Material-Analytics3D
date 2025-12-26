@@ -14,8 +14,8 @@ type ThermicCalculator interface {
 }
 
 type Therm struct {
-	AmountHeat
-	ThermalExpansion
+	AmountHeat       AmountHeat
+	ThermalExpansion ThermalExpansion
 }
 
 // AmountHeat Количество теплоты со значениями удельной теплоемкости c, массы m и изминения температуры delta T
@@ -65,17 +65,17 @@ func (t *ThermalExpansion) GetType() int {
 	return ThermalExpansionType
 }
 
-func CreateThermicCalculator(thermicType int, values ...float64) (ThermicCalculator, error) {
+func CreateThermicCalculator(thermicType string, values map[string]float64) (ThermicCalculator, error) {
 	switch thermicType {
-	case 0: // Количество теплоты
+	case "AmountHeat": // Количество теплоты
 		if len(values) == 4 {
-			return NewAmountHeat(values[0], values[1], values[2], values[3]), nil
+			return NewAmountHeat(values["SpecificHeat"], values["Mass"], values["Temperature1"], values["Temperature2"]), nil
 		}
 		return nil, ErrEnoughArg
 
-	case 1: // Тепловое расширение
+	case "ThermalExpansion": // Тепловое расширение
 		if len(values) == 4 {
-			return NewThermalExpansion(values[0], values[1], values[2], values[3]), nil
+			return NewThermalExpansion(values["Coefficient"], values["Lenght"], values["Temperature1"], values["Temperature2"]), nil
 		}
 		return nil, ErrEnoughArg
 

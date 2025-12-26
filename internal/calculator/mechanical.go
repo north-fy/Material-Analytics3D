@@ -17,9 +17,9 @@ type MechanicCalculator interface {
 }
 
 type Mech struct {
-	CompressiveStress
-	RelativeDeformation
-	YoungsModulus
+	CompressiveStress   CompressiveStress
+	RelativeDeformation RelativeDeformation
+	YoungsModulus       YoungsModulus
 }
 
 // CompressiveStress Напряжение сжатия/растяжения со значением силы F и площади попер. сеч. S, перпендикулярная к силе F
@@ -85,23 +85,23 @@ func (y *YoungsModulus) GetType() int {
 	return YoungsModulusType
 }
 
-func CreateMechanicCalculator(mechanicType int, values ...float64) (MechanicCalculator, error) {
+func CreateMechanicCalculator(mechanicType string, values map[string]float64) (MechanicCalculator, error) {
 	switch mechanicType {
-	case 0: // Напряжение растяжения/сжатия
+	case "CompressiveStress": // Напряжение растяжения/сжатия
 		if len(values) == 2 {
-			return NewCompressiveStress(values[0], values[1]), nil
+			return NewCompressiveStress(values["Force"], values["CrossArea"]), nil
 		}
 		return nil, ErrEnoughArg
 
-	case 1: // Относительная деформация
+	case "RelativeDeformation": // Относительная деформация
 		if len(values) == 2 {
-			return NewRelativeDeformation(values[0], values[1]), nil
+			return NewRelativeDeformation(values["Lenght"], values["ChangeLenght"]), nil
 		}
 		return nil, ErrEnoughArg
 
-	case 2: // Модуль Юнга
+	case "YoungsModulus": // Модуль Юнга
 		if len(values) == 2 {
-			return NewYoungsModulus(values[0], values[1]), nil
+			return NewYoungsModulus(values["RelativeDeformationValue"], values["CompressiveStressValue"]), nil
 		}
 		return nil, ErrEnoughArg
 
