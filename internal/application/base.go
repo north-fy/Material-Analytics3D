@@ -3,6 +3,7 @@ package application
 import (
 	"fmt"
 	"image/color"
+	"net/url"
 	"strconv"
 	"sync"
 
@@ -11,11 +12,13 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
+	"github.com/north-fy/Material-Analytics3D/internal/render"
 )
 
 type CalcSettings struct {
 	data     map[string]float64
 	typeCalc string
+	history  [10]string
 
 	labelDropDown1 *widget.Label
 	dropdown1      *widget.Select
@@ -28,7 +31,9 @@ type CalcSettings struct {
 	entryValues []*widget.Entry
 
 	labelAnswer      *widget.Label
-	labelAnswerValue *widget.Label
+	labelAnswerValue [3]*widget.Label
+
+	content *fyne.Container
 
 	mu *sync.Mutex
 }
@@ -38,7 +43,9 @@ func (r *Router) createBaseScreen() fyne.CanvasObject {
 	leftMenu := CalcSettings{
 		data:        make(map[string]float64),
 		entryValues: make([]*widget.Entry, 4),
-		mu:          &sync.Mutex{},
+		content:     container.NewMax(),
+
+		mu: &sync.Mutex{},
 	}
 
 	leftMenu.labelDropDown1 = widget.NewLabel("Тип калькулятора:")
@@ -81,7 +88,10 @@ func (r *Router) createBaseScreen() fyne.CanvasObject {
 	leftMenu.separator2.StrokeWidth = 2
 
 	leftMenu.labelAnswer = widget.NewLabel("Полученное значение:")
-	leftMenu.labelAnswerValue = widget.NewLabel("")
+
+	for i := range 3 {
+		leftMenu.labelAnswerValue[i] = widget.NewLabel("")
+	}
 
 	leftPanel := container.NewVBox(
 		leftMenu.labelDropDown1,
@@ -93,7 +103,9 @@ func (r *Router) createBaseScreen() fyne.CanvasObject {
 		leftMenu.separator2,
 
 		leftMenu.labelAnswer,
-		leftMenu.labelAnswerValue,
+		leftMenu.labelAnswerValue[0],
+		leftMenu.labelAnswerValue[1],
+		leftMenu.labelAnswerValue[2],
 	)
 
 	// ================= ВЕРХНЯЯ ПАНЕЛЬ =================
@@ -145,23 +157,79 @@ func (r *Router) createBaseScreen() fyne.CanvasObject {
 			dialog.ShowError(err, r.managerScreen.window)
 		}
 
-		var answerText, text string
+		var (
+			i    int
+			text string
+		)
 
 		for k, v := range answer {
 			if v != 0 {
-				text = fmt.Sprintf(" %s -> %.4f |", k, v)
+				text = fmt.Sprintf(" %s -> %.1f |", k, v)
 			}
 
-			answerText += text
+			leftMenu.labelAnswerValue[i].Text = text
+			leftMenu.labelAnswerValue[i].Refresh()
+			i += 1
 		}
 
-		leftMenu.labelAnswerValue.Text = answerText
-		leftMenu.labelAnswerValue.Refresh()
+		// history
+		op := fmt.Sprintf("operation: %s | value: %v", leftMenu.typeCalc, answer)
+		addOperation(&leftMenu.history, op)
 	})
-	buttonCancel := widget.NewButton("Сбросить", func() {})
-	buttonOperations := widget.NewButton("Журнал операций", func() {})
-	buttonNotation := widget.NewButton("Система счисления", func() {})
-	buttonVisual := widget.NewButton("Визуализировать", func() {})
+	buttonCancel := widget.NewButton("Сбросить", func() {
+		for i := range 3 {
+			leftMenu.labelAnswerValue[i].Text = ""
+			leftMenu.labelAnswerValue[i].Refresh()
+		}
+
+		leftMenu.dropdown1.Selected = ""
+		leftMenu.dropdown2.Selected = ""
+
+		leftMenu.dropdown1.Refresh()
+		leftMenu.dropdown2.Refresh()
+
+		for _, v := range leftMenu.entryValues {
+			v.Hide()
+		}
+	})
+	buttonOperations := widget.NewButton("Журнал операций", func() {
+		var historyText string
+
+		for _, v := range leftMenu.history {
+			historyText += v + "\n"
+		}
+
+		dialog.ShowInformation("operations", historyText, r.managerScreen.window)
+	})
+	buttonNotation := widget.NewButton("Система счисления", func() {
+		notion := fmt.Sprintf("Все значения записываются в исходных измерениях \n" +
+			"Например: Масса - кг \n" +
+			"Импульс - кг * м/с и так далее")
+		dialog.ShowInformation("notion", notion, r.managerScreen.window)
+	})
+	buttonVisual := widget.NewButton("Визуализировать", func() {
+		renderer := render.NewRenderer(750.0/1.5, 500.0/1.5)
+		cube := render.CreateCube(2, render.GetColor("green"))
+		cubeObj := renderer.Render(cube)
+
+		leftMenu.content.Objects = []fyne.CanvasObject{cubeObj}
+
+		//go func() {
+		//	angle := 0.0
+		//	for {
+		//		angle += 0.02
+		//
+		//		renderer.Rotate(cube, angle*0.4, angle*0.6)
+		//
+		//		if len(leftMenu.content.Objects) > 0 {
+		//			leftMenu.content.Objects = []fyne.CanvasObject{renderer.Render(cube)}
+		//			leftMenu.content.Refresh()
+		//		}
+		//
+		//		time.Sleep(16 * time.Millisecond)
+		//	}
+		//}()
+	})
 
 	bottomPanel := container.NewVBox(
 		container.NewGridWithColumns(2,
@@ -185,9 +253,12 @@ func (r *Router) createBaseScreen() fyne.CanvasObject {
 	logoRes3, _ := fyne.LoadResourceFromPath("./assets/logo.png")
 	icon3 := widget.NewIcon(logoRes3)
 
-	buttonTop1 := widget.NewButton("github", func() {})
-	buttonTop2 := widget.NewButton("t.me/n0rth3am", func() {})
-	buttonTop3 := widget.NewButton("version 1.0", func() {})
+	buttonTop1 := widget.NewHyperlink("github", parseURL("https://github.com/north-fy"))
+	buttonTop2 := widget.NewHyperlink("telegram", parseURL("https://t.me/n0rth3am"))
+	buttonTop3 := widget.NewButton("version 1.0", func() {
+		msg := fmt.Sprintf("version 1.0 \n Изменения: ...")
+		dialog.ShowInformation("information", msg, r.managerScreen.window)
+	})
 
 	// Контейнер для правой панели
 	rightTopPanel := container.NewVBox(
@@ -221,8 +292,12 @@ func (r *Router) createBaseScreen() fyne.CanvasObject {
 	rect.SetMinSize(fyne.NewSize(750.0/1.5, 500.0/1.5))
 
 	// Контейнер для прямоугольника (для центрирования)
-	rectContainer := container.NewCenter(rect)
+	rectContainer := container.NewStack(
+		rect,
+		leftMenu.content,
+	)
 
+	rectContainer = container.NewCenter(rectContainer)
 	// ================= ОСНОВНОЙ МАКЕТ =================
 	// Создаем основной макет с помощью Border
 	// Сверху - верхняя панель
@@ -239,4 +314,17 @@ func (r *Router) createBaseScreen() fyne.CanvasObject {
 	)
 
 	return mainContainer
+}
+
+func parseURL(urlStr string) *url.URL {
+	link, _ := url.Parse(urlStr)
+	return link
+}
+
+func addOperation(history *[10]string, newOp string) {
+	for i := len(history) - 2; i >= 0; i-- {
+		history[i+1] = history[i]
+	}
+
+	history[0] = newOp
 }
