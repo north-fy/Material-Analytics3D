@@ -51,6 +51,7 @@ func (mp *MainApp) initScreens() {
 	mp.Router.managerScreen.addScreen("auth", mp.Router.createMainScreen())
 	mp.Router.managerScreen.addScreen("reg", mp.Router.createRegScreen())
 	mp.Router.managerScreen.addScreen("base", mp.Router.createBaseScreen())
+	mp.Router.managerScreen.addScreen("color", mp.Router.createColorScreen())
 
 	mp.Router.managerScreen.setCurrentScreen("auth")
 }

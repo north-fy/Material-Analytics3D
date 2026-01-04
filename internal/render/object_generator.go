@@ -18,6 +18,7 @@ type Vector3 struct {
 // Face - грань объекта
 type Face struct {
 	Vertices []Vector3
+	Indices  []int // Индексы вершин в общем массиве
 	Color    color.Color
 }
 
@@ -44,41 +45,46 @@ func NewRenderer(width, height float64) *Renderer {
 	}
 }
 
-// CreatePyramid создает пирамиду
+// CreatePyramid создает пирамиду с правильными индексами
 func CreatePyramid(baseSize, height float64, col color.Color) *Mesh {
 	half := baseSize / 2
 
 	vertices := []Vector3{
 		// Основание
-		{-half, -half, -half}, // 0
-		{half, -half, -half},  // 1
-		{half, -half, half},   // 2
-		{-half, -half, half},  // 3
+		{half, -half, -half},  // 0
+		{-half, -half, -half}, // 1
+		{-half, -half, half},  // 2
+		{half, -half, half},   // 3
 		// Вершина
-		{0, height, 0}, // 4
+		{0, -height, 0}, // 4 (смещена вниз)
 	}
 
 	faces := []Face{
-		// Основание (4 стороны)
+		// Основание (квадрат)
 		{
 			Vertices: []Vector3{vertices[0], vertices[1], vertices[2], vertices[3]},
-			Color:    col,
+			Indices:  []int{0, 1, 2, 3},
+			Color:    adjustColor(col, -20),
 		},
-		// Боковые грани (треугольники - 3 стороны)
+		// Боковые грани (треугольники)
 		{
 			Vertices: []Vector3{vertices[0], vertices[1], vertices[4]},
+			Indices:  []int{0, 1, 4},
 			Color:    adjustColor(col, -30),
 		},
 		{
 			Vertices: []Vector3{vertices[1], vertices[2], vertices[4]},
+			Indices:  []int{1, 2, 4},
 			Color:    adjustColor(col, -20),
 		},
 		{
 			Vertices: []Vector3{vertices[2], vertices[3], vertices[4]},
+			Indices:  []int{2, 3, 4},
 			Color:    adjustColor(col, -10),
 		},
 		{
 			Vertices: []Vector3{vertices[3], vertices[0], vertices[4]},
+			Indices:  []int{3, 0, 4},
 			Color:    adjustColor(col, -40),
 		},
 	}
@@ -86,71 +92,8 @@ func CreatePyramid(baseSize, height float64, col color.Color) *Mesh {
 	return &Mesh{Vertices: vertices, Faces: faces}
 }
 
-// CreateCube создает куб
-func CreateCube(size float64, col color.Color) *Mesh {
-	half := size / 2
-
-	vertices := []Vector3{
-		// Передняя грань
-		{-half, -half, half}, // 0
-		{half, -half, half},  // 1
-		{half, half, half},   // 2
-		{-half, half, half},  // 3
-		// Задняя грань
-		{-half, -half, -half}, // 4
-		{half, -half, -half},  // 5
-		{half, half, -half},   // 6
-		{-half, half, -half},  // 7
-	}
-
-	faces := []Face{
-		// Передняя (4 стороны)
-		{
-			Vertices: []Vector3{vertices[0], vertices[1], vertices[2], vertices[3]},
-			Color:    col,
-		},
-		// Задняя (4 стороны)
-		{
-			Vertices: []Vector3{vertices[4], vertices[5], vertices[6], vertices[7]},
-			Color:    adjustColor(col, -40),
-		},
-		// Верхняя (4 стороны)
-		{
-			Vertices: []Vector3{vertices[3], vertices[2], vertices[6], vertices[7]},
-			Color:    adjustColor(col, 20),
-		},
-		// Нижняя (4 стороны)
-		{
-			Vertices: []Vector3{vertices[0], vertices[1], vertices[5], vertices[4]},
-			Color:    adjustColor(col, -20),
-		},
-		// Левая (4 стороны)
-		{
-			Vertices: []Vector3{vertices[4], vertices[0], vertices[3], vertices[7]},
-			Color:    adjustColor(col, -10),
-		},
-		// Правая (4 стороны)
-		{
-			Vertices: []Vector3{vertices[1], vertices[5], vertices[6], vertices[2]},
-			Color:    adjustColor(col, 10),
-		},
-	}
-
-	return &Mesh{Vertices: vertices, Faces: faces}
-}
-
-// CreateParallelepiped создает параллелепипед
-func CreateParallelepiped(width, height, depth float64, col color.Color, stretch string) *Mesh {
+func CreateParallelepiped(width, height, depth float64, col color.Color) *Mesh {
 	w, h, d := width, height, depth
-
-	switch stretch {
-	case "width":
-		w *= 1.5
-	case "height":
-		h *= 1.5
-	case "depth":
-		d *= 1.5
-	}
 
 	halfW := w / 2
 	halfH := h / 2
@@ -170,29 +113,40 @@ func CreateParallelepiped(width, height, depth float64, col color.Color, stretch
 	}
 
 	faces := []Face{
-		// Все грани по 4 стороны
+		// Передняя
 		{
 			Vertices: []Vector3{vertices[0], vertices[1], vertices[2], vertices[3]},
+			Indices:  []int{0, 1, 2, 3},
 			Color:    col,
 		},
+		// Задняя
 		{
 			Vertices: []Vector3{vertices[4], vertices[5], vertices[6], vertices[7]},
+			Indices:  []int{4, 5, 6, 7},
 			Color:    adjustColor(col, -40),
 		},
+		// Верхняя
 		{
 			Vertices: []Vector3{vertices[3], vertices[2], vertices[6], vertices[7]},
+			Indices:  []int{3, 2, 6, 7},
 			Color:    adjustColor(col, 20),
 		},
+		// Нижняя
 		{
 			Vertices: []Vector3{vertices[0], vertices[1], vertices[5], vertices[4]},
+			Indices:  []int{0, 1, 5, 4},
 			Color:    adjustColor(col, -20),
 		},
+		// Левая
 		{
 			Vertices: []Vector3{vertices[4], vertices[0], vertices[3], vertices[7]},
+			Indices:  []int{4, 0, 3, 7},
 			Color:    adjustColor(col, -10),
 		},
+		// Правая
 		{
 			Vertices: []Vector3{vertices[1], vertices[5], vertices[6], vertices[2]},
+			Indices:  []int{1, 5, 6, 2},
 			Color:    adjustColor(col, 10),
 		},
 	}
@@ -200,25 +154,90 @@ func CreateParallelepiped(width, height, depth float64, col color.Color, stretch
 	return &Mesh{Vertices: vertices, Faces: faces}
 }
 
+//// CreateCube создает куб с правильными индексами
+//func CreateCube(size float64, col color.Color) *Mesh {
+//	half := size / 2
+//
+//	vertices := []Vector3{
+//		// Передняя грань
+//		{-half, -half, half}, // 0
+//		{half, -half, half},  // 1
+//		{half, half, half},   // 2
+//		{-half, half, half},  // 3
+//		// Задняя грань
+//		{-half, -half, -half}, // 4
+//		{half, -half, -half},  // 5
+//		{half, half, -half},   // 6
+//		{-half, half, -half},  // 7
+//	}
+//
+//	faces := []Face{
+//		// Передняя
+//		{
+//			Vertices: []Vector3{vertices[0], vertices[1], vertices[2], vertices[3]},
+//			Indices:  []int{0, 1, 2, 3},
+//			Color:    col,
+//		},
+//		// Задняя
+//		{
+//			Vertices: []Vector3{vertices[4], vertices[5], vertices[6], vertices[7]},
+//			Indices:  []int{4, 5, 6, 7},
+//			Color:    adjustColor(col, -40),
+//		},
+//		// Верхняя
+//		{
+//			Vertices: []Vector3{vertices[3], vertices[2], vertices[6], vertices[7]},
+//			Indices:  []int{3, 2, 6, 7},
+//			Color:    adjustColor(col, 20),
+//		},
+//		// Нижняя
+//		{
+//			Vertices: []Vector3{vertices[0], vertices[1], vertices[5], vertices[4]},
+//			Indices:  []int{0, 1, 5, 4},
+//			Color:    adjustColor(col, -20),
+//		},
+//		// Левая
+//		{
+//			Vertices: []Vector3{vertices[4], vertices[0], vertices[3], vertices[7]},
+//			Indices:  []int{4, 0, 3, 7},
+//			Color:    adjustColor(col, -10),
+//		},
+//		// Правая
+//		{
+//			Vertices: []Vector3{vertices[1], vertices[5], vertices[6], vertices[2]},
+//			Indices:  []int{1, 5, 6, 2},
+//			Color:    adjustColor(col, 10),
+//		},
+//	}
+//
+//	return &Mesh{Vertices: vertices, Faces: faces}
+//}
+
 // Render рисует объект
 func (r *Renderer) Render(mesh *Mesh) fyne.CanvasObject {
 	content := container.NewWithoutLayout()
 
+	// Сначала рисуем заполненные грани
 	for _, face := range mesh.Faces {
 		if len(face.Vertices) < 3 {
 			continue
 		}
+		r.drawFilledFace(content, face)
+	}
 
-		// Создаем линии для отрисовки граней
-		r.drawFace(content, face)
+	// Затем рисуем контуры поверх
+	for _, face := range mesh.Faces {
+		if len(face.Vertices) < 2 {
+			continue
+		}
+		r.drawFaceOutline(content, face)
 	}
 
 	return content
 }
 
-// drawFace рисует одну грань
-func (r *Renderer) drawFace(container *fyne.Container, face Face) {
-	// Рисуем линии между всеми вершинами грани
+// drawFaceOutline рисует контур грани
+func (r *Renderer) drawFaceOutline(container *fyne.Container, face Face) {
 	for i := 0; i < len(face.Vertices); i++ {
 		next := (i + 1) % len(face.Vertices)
 
@@ -228,63 +247,24 @@ func (r *Renderer) drawFace(container *fyne.Container, face Face) {
 		line := canvas.NewLine(face.Color)
 		line.Position1 = fyne.NewPos(float32(x1), float32(y1))
 		line.Position2 = fyne.NewPos(float32(x2), float32(y2))
-		line.StrokeWidth = 3
+		line.StrokeWidth = 2
 
 		container.Add(line)
-	}
-
-	// Дополнительно: рисуем заполнение для грани
-	if len(face.Vertices) >= 3 {
-		r.drawFilledFace(container, face)
 	}
 }
 
 // drawFilledFace рисует заполненную грань
 func (r *Renderer) drawFilledFace(container *fyne.Container, face Face) {
-	// Определяем количество сторон для полигона
-	numSides := len(face.Vertices)
-	if numSides < 3 {
-		numSides = 3
-	}
-
-	// Создаем полигон с правильным количеством сторон
-	polygon := canvas.NewPolygon(uint(numSides), face.Color)
-
-	// Находим границы грани
-	minX, minY := math.MaxFloat64, math.MaxFloat64
-	maxX, maxY := -math.MaxFloat64, -math.MaxFloat64
-
-	for _, v := range face.Vertices {
+	// Создаем полигон для заполнения
+	points := make([]fyne.Position, len(face.Vertices))
+	for i, v := range face.Vertices {
 		x, y := r.project(v)
-		if x < minX {
-			minX = x
-		}
-		if y < minY {
-			minY = y
-		}
-		if x > maxX {
-			maxX = x
-		}
-		if y > maxY {
-			maxY = y
-		}
+		points[i] = fyne.NewPos(float32(x), float32(y))
 	}
 
-	// Устанавливаем позицию и размер полигона
-	pos := fyne.NewPos(float32(minX), float32(minY))
-	size := fyne.NewSize(float32(maxX-minX), float32(maxY-minY))
-
-	// Используем Move и Resize
-	polygon.Move(pos)
-	polygon.Resize(size)
-
-	// Делаем полигон полупрозрачным для видимости линий
-	if rgba, ok := face.Color.(color.RGBA); ok {
-		rgba.A = 100 // Полупрозрачный
-		polygon.FillColor = rgba
-	}
-
-	container.Add(polygon)
+	// Создаем и добавляем полигон
+	//polygon := canvas.NewPolygon(, face.Color)
+	//container.Add(polygon)
 }
 
 // project преобразует 3D в 2D
@@ -302,32 +282,100 @@ func (r *Renderer) project(v Vector3) (float64, float64) {
 	return x, y
 }
 
-// Rotate вращает объект
-func (r *Renderer) Rotate(mesh *Mesh, angleX, angleY float64) {
-	cosX, sinX := math.Cos(angleX), math.Sin(angleX)
-	cosY, sinY := math.Cos(angleY), math.Sin(angleY)
+// RotateY вращает объект вокруг Y
+func (r *Renderer) RotateY(mesh *Mesh, angle float64) {
+	cosA := math.Cos(angle)
+	sinA := math.Sin(angle)
 
 	// Вращаем все вершины
 	for i := range mesh.Vertices {
 		v := &mesh.Vertices[i]
 
-		// Вращение вокруг Y
-		x := v.X*cosY - v.Z*sinY
-		z := v.X*sinY + v.Z*cosY
-		v.X, v.Z = x, z
+		// Вращение вокруг оси Y
+		x := v.X*cosA + v.Z*sinA
+		z := -v.X*sinA + v.Z*cosA
 
-		// Вращение вокруг X
-		y := v.Y*cosX - v.Z*sinX
-		z = v.Y*sinX + v.Z*cosX
+		v.X, v.Z = x, z
+	}
+
+	// ОБНОВЛЯЕМ ВЕРШИНЫ В ГРАНЯХ, используя индексы
+	for faceIdx := range mesh.Faces {
+		for vertIdx, vertexIdx := range mesh.Faces[faceIdx].Indices {
+			if vertexIdx < len(mesh.Vertices) {
+				mesh.Faces[faceIdx].Vertices[vertIdx] = mesh.Vertices[vertexIdx]
+			}
+		}
+	}
+}
+
+// RotateX вращает объект вокруг X
+func (r *Renderer) RotateX(mesh *Mesh, angle float64) {
+	cosA := math.Cos(angle)
+	sinA := math.Sin(angle)
+
+	// Вращаем все вершины
+	for i := range mesh.Vertices {
+		v := &mesh.Vertices[i]
+
+		// Вращение вокруг оси X
+		y := v.Y*cosA - v.Z*sinA
+		z := v.Y*sinA + v.Z*cosA
+
 		v.Y, v.Z = y, z
 	}
 
-	// Обновляем грани
-	for i := range mesh.Faces {
-		for j := range mesh.Faces[i].Vertices {
-			// Используем соответствующие вершины
-			mesh.Faces[i].Vertices[j] = mesh.Vertices[j]
+	// Обновляем вершины в гранях
+	for faceIdx := range mesh.Faces {
+		for vertIdx, vertexIdx := range mesh.Faces[faceIdx].Indices {
+			if vertexIdx < len(mesh.Vertices) {
+				mesh.Faces[faceIdx].Vertices[vertIdx] = mesh.Vertices[vertexIdx]
+			}
 		}
+	}
+}
+
+// RotateZ вращает объект вокруг Z
+func (r *Renderer) RotateZ(mesh *Mesh, angle float64) {
+	cosA := math.Cos(angle)
+	sinA := math.Sin(angle)
+
+	// Вращаем все вершины
+	for i := range mesh.Vertices {
+		v := &mesh.Vertices[i]
+
+		// Вращение вокруг оси Z
+		x := v.X*cosA - v.Y*sinA
+		y := v.X*sinA + v.Y*cosA
+
+		v.X, v.Y = x, y
+	}
+
+	// Обновляем вершины в гранях
+	for faceIdx := range mesh.Faces {
+		for vertIdx, vertexIdx := range mesh.Faces[faceIdx].Indices {
+			if vertexIdx < len(mesh.Vertices) {
+				mesh.Faces[faceIdx].Vertices[vertIdx] = mesh.Vertices[vertexIdx]
+			}
+		}
+	}
+}
+
+// Обновленная функция для использования углов в градусах
+func (r *Renderer) RotateDegrees(mesh *Mesh, angleX, angleY, angleZ float64) {
+	// Конвертируем градусы в радианы
+	radX := angleX * math.Pi / 180
+	radY := angleY * math.Pi / 180
+	radZ := angleZ * math.Pi / 180
+
+	// Вращаем по всем осям
+	if radX != 0 {
+		r.RotateX(mesh, radX)
+	}
+	if radY != 0 {
+		r.RotateY(mesh, radY)
+	}
+	if radZ != 0 {
+		r.RotateZ(mesh, radZ)
 	}
 }
 

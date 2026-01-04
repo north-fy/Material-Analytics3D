@@ -28,7 +28,6 @@ func newRouter(cfg repository.Config, window fyne.Window) (*Router, error) {
 	}, nil
 }
 
-// handleAuth FIXXX
 func (r *Router) handleAuth(login, password string) error {
 	u, err := r.repo.GetUser(login)
 	if err != nil {
@@ -38,10 +37,13 @@ func (r *Router) handleAuth(login, password string) error {
 	if u.Login == "" || u.Password == "" {
 		return errWrongData
 	}
-	_ = u
-	r.managerScreen.setCurrentScreen("base")
-	return nil
-	//switchTo(base, access)
+
+	if login == u.Login && password == u.Password {
+		r.managerScreen.setCurrentScreen("base")
+		return nil
+	}
+
+	return errWrongData
 }
 
 func (r *Router) handleReg(login, password string) error {

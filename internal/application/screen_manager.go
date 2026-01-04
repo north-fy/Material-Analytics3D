@@ -9,12 +9,19 @@ type ScreenManager struct {
 	screens       map[screenName]fyne.CanvasObject
 	currentScreen screenName
 	onSwitch      func(screenName)
+	settings      map[string]string
 }
 
 func NewScreenManager(window fyne.Window) *ScreenManager {
+	st := map[string]string{
+		"color": "green",
+		"theme": "dark",
+	}
+
 	return &ScreenManager{
-		window:  window,
-		screens: make(map[screenName]fyne.CanvasObject),
+		window:   window,
+		screens:  make(map[screenName]fyne.CanvasObject),
+		settings: st,
 	}
 }
 
