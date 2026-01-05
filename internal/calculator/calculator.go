@@ -4,17 +4,6 @@ import (
 	"reflect"
 )
 
-/*
-Здесь оставлю свое повествование
-Короче похуй, надо либо переделывать архитектуру калькулятора
-Либо забивать болт и создавать каждый кальк отдельно, а потом значения прикручивать
-Мол у нас есть дата map[string]interface{calculate, gettype, set_value}
-Через дату узнавать какой кальк нужен, по интерфейсу обращаться к нему
-gettype - узнать кол-во значений мб?
-set_value очевидно, что установить values...float64 значений
-calculate - дураку понятно
-*/
-
 type CalcService struct {
 	SpecificCalc map[string]interface{}
 	CurrentCalc  interface{}
